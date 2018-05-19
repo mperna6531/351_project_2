@@ -4,40 +4,99 @@
 #include <iostream>
 #include <memory>
 #include <queue>
+#include <vector>
 
 #include "process.h"
-#include "queue.h"
 #include "memory.h"
 #include "prototypes.h"
-
 const int timeMax = 100000;
 int numOfProcs = 0, lastAnnouncement = -1;
-Process *proc_list;
-std::unique_ptr<std::queue<Process>> pq;
-std::unique_ptr<FrameList> fl;
+
+std::vector<Process> pl;
+FrameList fl;
+std::vector<Process> pq;
+
+void print_proc_queue(std::vector<Process> pq) {
+	std::cout << "\tInput queue: [ ";
+
+	for (auto el : pq) {
+   std::cout << el.pid;
+	}
+	std::cout <<  "]\n";
+}
+void enqueue_newly_arrived(long current_time) {
+   for (auto proc : pl) {
+	    if (proc.arrivalTime == current_time) {
+			  std::cout << getAnnouncementPrefix(current_time) <<
+			    "Process " << proc.pid << std::endl;
+		      
+			  pq.push_back(proc);
+        print_proc_queue(pq);
+        fl.print();
+		  }
+    
+		}
+}
+
+void terminate_completed_process(long current_time) {
+	int time_spent_in_memory = 0;
+
+	// dequeue any procs that need it
+	for (auto proc : pl) {
+		time_spent_in_memory = current_time - proc.timeAddMemory;
+
+		if (proc.isActive && (time_spent_in_memory >= proc.lifeTime)) {
+			std::cout << getAnnouncementPrefix(current_time)
+        << "Process " << proc.pid << " completes\n";
+
+			proc.isActive = 0;
+			proc.timeDone = current_time;
+
+			fl.free_by_pid(proc.pid);
+
+			fl.print();
+		}
+	}
+}
+
+void assign_available_mem(long current_time) {
+	int i, index, limit;
+	limit = pq.size();
+
+	// enqueue any procs that can be put into mem
+	for (int i = 0; i < pq.size(); ++i) {
+		Process proc = pq.at(i);
+
+		if (fl.process_fits(proc)) {
+			std::cout << getAnnouncementPrefix(current_time) 
+        << "MM moves Process " << proc.pid << " to memory\n";
+
+    proc.isActive = 1;
+		proc.timeAddMemory = current_time;
+		fl.fit_process(proc);
+  
+		pq.erase(pq.begin() + i);
+		print_proc_queue(pq);
+    fl.print();
+		}
+	}
+}
 
 void main_loop() {
-	long currentTime = 0;
-	while (1) {
-		(currentTime);
+	long current_time = 0;
+	while (!pq.empty() && !fl.empty()) {
 
-		(currentTime);
+		enqueue_newly_arrived(current_time);
+    terminate_completed_process(current_time);
+		assign_available_mem(current_time);
 
-		assignAvailableMemoryWaitingProcs(currentTime);
+		++current_time;
 
-		currentTime++;
-
-		if (currentTime > timeMax)
-		{
-			printf("DEADLOCK: max time reached\n");
+		if (current_time > timeMax) {
+			std::cout << "DEADLOCK: max time reached\n";
 			break;
 		}
-
-		if (queue->size_ == 0 && fl->empty())
-			break;
-		
 	}
-
 	printTurnaroundTime();
 }
 
@@ -60,49 +119,7 @@ int main() {
 	return 0;
 }
 
-void enqueueNewArrivedProces(int currentTime){
-	Process* proc;
 
-	for (int i = 0; i < numOfProcs; i++) {
-		proc = &procList[i];
-
-		if (proc->arrivalTime == currentTime) {
-			printf("%sProcess %d arrives\n",
-				getAnnouncementPrefix(currentTime),
-				proc->pid);
-
-			enqueueProc(queue, proc);
-
-			printProcQueue(queue);
-			printFrameList(framelist);
-		}
-	}
-}
-
-void terminateCompletedProcs(int currentTime) 
-{
-	int i, time_spent_in_memory;
-	Process* proc;
-
-	// dequeue any procs that need it
-	for (i = 0; i < numOfProcs; i += 1) {
-		proc = &procList[i];
-		time_spent_in_memory = currentTime - proc->timeAddMemory;
-
-		if (proc->isActive && (time_spent_in_memory >= proc->lifeTime)) {
-			printf("%sProcess %d completes\n",
-				getAnnouncementPrefix(currentTime),
-				proc->pid);
-
-			proc->isActive = 0;
-			proc->timeDone = currentTime;
-
-			freeMemoryPID(framelist, proc->pid);
-
-			printFrameList(framelist);
-		}
-	}
-}
 
 void assignAvailableMemoryWaitingProcs(int currentTime)
 {

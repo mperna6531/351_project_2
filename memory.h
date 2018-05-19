@@ -40,33 +40,34 @@ private:
   int page_size_;
 public:
   void print();
-  bool process_fits(Process *proc);
-  void fit_process(Process *proc);
+  bool process_fits(Process proc);
+  void fit_process(Process proc);
   FrameList(int num_frames, int pg_size) :
     num_frames_(num_frames), 
 	page_size_(pg_size),
 	frames_(pg_size) {}
+  FrameList();
   void free_by_pid(int pid);
   bool empty();
 };
 
-bool FrameList::process_fits(Process *proc) {
+bool FrameList::process_fits(Process proc) {
 int free_frames = 0;
 
   for (auto frame : frames_) 
     if (!frame->assigned()) 
 			++free_frames;
     
-  return (free_frames * page_size_) >= proc->memReqs;
+  return (free_frames * page_size_) >= proc.memReqs;
 }
 
-void FrameList::fit_process(Process *proc) {
-	int remaining_mem = proc->memReqs;
+void FrameList::fit_process(Process proc) {
+	int remaining_mem = proc.memReqs;
   int current_page = 1;
   
   for (auto &frame : frames_) {
 		if (!frame->assigned()) {
-		  frame = std::shared_ptr<Frame>(new Frame(true, proc->pid, current_page++));
+		  frame = std::shared_ptr<Frame>(new Frame(true, proc.pid, current_page++));
 			remaining_mem -= page_size_;
 		}
   }
