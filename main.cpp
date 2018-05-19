@@ -1,13 +1,14 @@
 // CPSC 351 Assignment 2.cpp : Defines the entry point for the console application.
 //
+
 #include <iostream>
+#include <memory>
+#include <queue>
 
 #include "process.h"
 #include "queue.h"
 #include "memory.h"
 #include "prototypes.h"
-#include <memory>
-#include <queue>
 
 const int timeMax = 100000;
 int numOfProcs = 0, lastAnnouncement = -1;
