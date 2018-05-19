@@ -1,147 +1,112 @@
 #pragma once
 
 #include "process.h"
+#include <iostream>
+#include <memory>
+#include <vector>
 
-struct Frame
-{
-	int assigned;
-	char location[40];
-	int procAssign;
-	int pageNum;
+class Frame {
+private:
+  bool assigned_;
+  int proc_assign_;
+  int page_num_;
+public:
+  int page_num() { return page_num_; }
+  Frame (bool assigned, int proc, int page) : 
+    assigned_(assigned), 
+	proc_assign_(proc), 
+	page_num_(page) {}
+  Frame() : assigned_(false) {}
+  int process_assigned() { return proc_assign_; }
+  bool assigned() { return assigned_; }
+  void assign(int pid, int page_num) {
+    assigned_ = true;
+    proc_assign_ = pid;
+    page_num_ = page_num;
+    }
+  void free() { 
+    assigned_ = false;
+    int proc_assign_ = 0;
+    int page_num_ = 0;
+  }
 };
 
-struct frameList
-{
-	Frame* frames;
-	int numOfFrames;
-	int pageSize;
+class FrameList {
+private:
+  using FrameVector = std::vector<std::shared_ptr<Frame>>;
+  FrameVector frames_;
+  int num_frames_;
+  int page_size_;
+public:
+  void print();
+  bool process_fits(Process *proc);
+  void fit_process(Process *proc);
+  FrameList(int num_frames, int pg_size) :
+    num_frames_(num_frames), 
+	page_size_(pg_size),
+	frames_(pg_size) {}
+  void free_by_pid(int pid);
+  bool empty();
 };
 
-frameList* createFrameList(int numOfFrames, int pageSize)
-{
-	frameList *f;
+bool FrameList::process_fits(Process *proc) {
+int free_frames = 0;
 
-	f = malloc(sizeof(frameList));
-
-	f->frames = (Frame*)malloc(sizeof(Frame)) *numOfFrames);
-	f->pageSize = pageSize;
-	f->numOfFrames = numOfFrames;
-
-	for (int i = 0; i < f->numOfFrames; i++)
-	{
-		f->frames[i].assigned = 0;
-	}
-
-	return f;
+  for (auto frame : frames_) 
+    if (!frame->assigned()) 
+			++free_frames;
+    
+  return (free_frames * page_size_) >= proc->memReqs;
 }
 
-int procFitMemory(frameList* list, Process* proc)
-{
-	int numFreeFrames = 0;
-
-	for (int i = 0; i < list->numOfFrames; i++)
-	{
-		if (!list->frames[i].assigned)
-		{
-			numFreeFrames += 1;
+void FrameList::fit_process(Process *proc) {
+	int remaining_mem = proc->memReqs;
+  int current_page = 1;
+  
+  for (auto &frame : frames_) {
+		if (!frame->assigned()) {
+		  frame = std::shared_ptr<Frame>(new Frame(true, proc->pid, current_page++));
+			remaining_mem -= page_size_;
 		}
-	}
-
-	return (numFreeFrames * list->pageSize) >= proc->memReqs;
+  }
 }
 
-void fitProcMemory(frameList* list, Process* proc)
-{
-	int remainingMem, currentPage = 1;
-
-	remainingMem = proc->memReqs;
-
-	for (int i = 0; i < list->numOfFrames; i++)
-	{
-		if (!list->frames[i].assigned)
-		{
-			list->frames[i].assigned = 1;
-
-			list->frames[i].pageNum = currentPage;
-
-			list->frames[i].procAssign = proc->pid;
-
-			currentPage++;
-			remainingMem -= list->pageSize;
+void FrameList::print() {
+	bool free_block = false;
+  int start_free = 1;
+  int begin;
+  int end;
+	std::cout << "\tMemory map:\n";
+ 
+	for (int i = 0; i < frames_.size(); ++i) {
+		if (!free_block && !frames_[i]->assigned()) {
+			free_block = true;
+		} else if (free_block && frames_[i]->assigned()) {
+			free_block = false;
+      begin = start_free * page_size_;
+      end = i * page_size_ - 1;
+			std::cout << "\t\t" << begin << "-" << end << ": Free frames\n";
 		}
 
-		if (remainingMem <= 0)
-		{
-			break;
+		if (frames_[i]->assigned()) {
+      begin = i * page_size_;
+      end = i * page_size_ - 1;
+			std::cout << "\t\t" << begin << "-" << end << 
+        ": Process: " << frames_[i]->process_assigned() << 
+        " Page: " << frames_[i]->page_num() << std::endl;
 		}
 	}
 }
 
-void printFrameList(frameList* list)
-{
-	int inFreeBlock = 0, start;
-
-	printf("\tMemory map:\n");
-
-	for (int i = 0; i < list->numOfFrames; i++)
-	{
-		if (!inFreeBlock && !list->frames[i].assigned)
-		{
-			inFreeBlock = 1;
-			start = i;
-		}
-		else if (inFreeBlock && list->frames[i].assigned)
-		{
-			inFreeBlock = 0;
-			printf("\t\t%d-%d: Free frame(s) \n", 
-				start * list->pageSize, 
-				(i * list->pageSize) - 1);
-		}
-
-		if (list->frames[i].assigned)
-		{
-			printf("\t\t%d-%d: Process %d, Page %d\n",
-				i * list->pageSize,
-				((i + 1) * list->pageSize) - 1,
-				list->frames[i].procAssign,
-				list->frames[i].pageNum);
-		}
-	}
-
-	if (inFreeBlock)
-	{
-		printf("\t\t%d-%d: Free frame(s)\n",
-			start * list->pageSize,
-			((i)* list->pageSize) - 1);
-	}
+bool FrameList::empty() {
+	for (auto frame : frames_)
+    if (frame->assigned())
+      return false;
+  return true;
 }
 
-int frameListEmpty(frameList* list)
-{
-	for (int i = 0; i < list->numOfFrames; i++)
-	{
-		if (list->frames[i].assigned)
-		{
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
-void freeMemoryPID(frameList* list, int pid)
-{
-	Frame* frame;
-
-	for (int i = 0; i < list->numOfFrames; i++)
-	{
-		frame = &list->frames[i];
-
-		if (frame->procAssign == pid)
-		{
-			frame->procAssign = 0;
-			frame->pageNum = 0;
-			frame->assigned = 0;
-		}
-	}
+void FrameList::free_by_pid(int pid) {
+	for (auto frame : frames_) 
+		if (frame->process_assigned() == pid)
+		  frame->free();
 }
