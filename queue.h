@@ -1,50 +1,48 @@
 #pragma once
 #include "process.h"
+#include <vector>
+#include <iostream>
 
-struct procQueue
+class ProcessQueue
 {
-	int capacity;
-	int size;
-	int front;
-	int rear;
-	Process **elements;
+private:
+	int capacity_;
+	int size_;
+	int front_;
+	int rear_;
+  
+  std::vector<Process> elements_;
+public:
+  int rear() { return rear_; }
+  int size() { return size_; }
+  int front() { return front_;}
+  void enqueue(Process proc);
+  ProcessQueue(int length);
 };
 
-procQueue* createProcQueue(int length)
-{
-	procQueue *q;
+ProcessQueue::ProcessQueue(int length) : 
+  capacity_(length), 
+  size_(0), 
+  front_(0), 
+  rear_(-1) {}
 
-	q = malloc(sizeof(procQueue));
-
-	q->elements = malloc(sizeof(Process) * length);
-	q->size = 0;
-	q->capacity = length;
-	q->front = 0;
-	q->rear = -1;
-
-	return q;
-}
-
-void enqueueProc(procQueue* q, Process* proc)
-{
-	if (q->size == q->capacity)
-	{
-		printf("ERROR: queue is full!\n");
-
-		exit(2);
+void ProcessQueue::enqueue(Process proc) {
+  if (size_ == capacity_) {
+		std::cout << "ERROR: queue is full!\n";
+      exit(1);
 	}
 
-	q->size++;
-	q->rear = q->rear + 1;
+	++size_;
 
-	if (q->rear == q->capacity)
-	{
-		q->rear = 0;
-	}
+	if(++rear_ == capacity_)
+    rear_ = 0;
 
-	q->elements[q->rear] = proc;
+	elements_.insert(elements_.begin() + rear_, proc);
 }
 
+int ProcessQueue::queue_next() {
+  if 
+}
 int queueNext(procQueue* q)
 {
 	if (!queueNext(q))
