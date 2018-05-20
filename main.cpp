@@ -1,8 +1,5 @@
 // main.cpp
-
 #include <iostream>
-#include "process.h"
-#include "memory.h"
 #include "memorymanager.h"
 
 int main() {

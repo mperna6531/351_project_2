@@ -4,15 +4,14 @@
 #include <string>
 #include <vector>
 
-#include "memory.h"
 #include "process.h"
-
+#include "framelist.h"
 
 class MemoryManager {
 private:
   const int MAX_TIME = 100000;
   long current_time_;
-  long last_announcement_; // -1
+  long last_announcement_;
 
   std::vector<Process> pl_;
   FrameList fl_;
@@ -32,7 +31,7 @@ public:
 };
 
 MemoryManager::MemoryManager(int mem, int page_size, std::string &filename) :
-  current_time_(0) {
+  current_time_(0), last_announcement_(0) {
   std::ifstream ifs;	
 
   if (!(mem % page_size == 0)) {

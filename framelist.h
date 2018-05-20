@@ -5,32 +5,7 @@
 #include <vector>
 
 #include "process.h"
-
-class Frame {
-private:
-  bool assigned_;
-  int proc_assign_;
-  int page_num_;
-public:
-  int page_num() { return page_num_; }
-  Frame (bool assigned, int proc, int page) : 
-    assigned_(assigned), 
-	proc_assign_(proc), 
-	page_num_(page) {}
-  Frame() : assigned_(false) {}
-  int process_assigned() { return proc_assign_; }
-  bool assigned() { return assigned_; }
-  void assign(int pid, int page_num) {
-    assigned_ = true;
-    proc_assign_ = pid;
-    page_num_ = page_num;
-  }
-  void free() { 
-    assigned_ = false;
-    int proc_assign_ = 0;
-    int page_num_ = 0;
-  }
-};
+#include "frame.h"
 
 class FrameList {
 private:
