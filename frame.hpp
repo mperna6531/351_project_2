@@ -28,8 +28,8 @@ void Frame::assign(int pid, int page_num) {
 
 void Frame::free() { 
   assigned_ = false;
-  int proc_assign_ = 0;
-  int page_num_ = 0;
+  proc_assign_ = 0;
+  page_num_ = 0;
 }
 
 int Frame::process_assigned() { return proc_assign_; }

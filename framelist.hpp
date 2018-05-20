@@ -4,15 +4,15 @@
 #include <iostream>
 #include <vector>
 
-#include "process.h"
-#include "frame.h"
+#include "process.hpp"
+#include "frame.hpp"
 
 class FrameList {
 private:
   using FrameVector = std::vector<Frame>;
-  FrameVector frames_;
   int num_frames_;
   int page_size_;
+  FrameVector frames_;
 public:
   void print();
   bool process_fits(Process proc);
@@ -55,7 +55,7 @@ void FrameList::print() {
   int end;
 	std::cout << "\tMemory map:\n";
  
-	for (int i = 0; i < frames_.size(); ++i) {
+	for (size_t i = 0; i < frames_.size(); ++i) {
 		if (!free_block && !frames_[i].assigned()) {
 			free_block = true;
       start_free = i;

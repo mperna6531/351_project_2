@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "process.h"
-#include "framelist.h"
+#include "process.hpp"
+#include "framelist.hpp"
 
 class MemoryManager {
 private:
@@ -104,7 +104,7 @@ std::string MemoryManager::get_prefix() {
 
 void MemoryManager::terminate_completed_processes() {
 	// dequeue any procs that need it
-	for (int i = 0; i < pl_.size(); ++i) {
+	for (size_t i = 0; i < pl_.size(); ++i) {
 
 	  if (pl_[i].active()) {
 			int time_elapsed = current_time_ - pl_[i].get_load_time();
@@ -127,7 +127,7 @@ void MemoryManager::update_pl(int pid) {
 }
 
 void MemoryManager::assign_available_memory() {
-	for (int i = 0; i < pq_.size(); ++i) {
+	for (size_t i = 0; i < pq_.size(); ++i) {
 		Process proc = pq_[i];
 
 		if (fl_.process_fits(proc)) {

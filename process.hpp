@@ -25,8 +25,11 @@ public:
 };
 
 Process::Process(int pid, int arrival_time, int life, int mem_reqs) :
-  pid_(pid), arrival_time_(arrival_time),
-  life_(life), mem_req_(mem_reqs), active_(false) {}
+  pid_(pid),
+  life_(life),
+  mem_req_(mem_reqs),
+  arrival_time_(arrival_time),
+  active_(false) {}
 
 long Process::get_time_done() const {
   return time_done_;
