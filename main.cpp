@@ -28,10 +28,21 @@ void print_proc_queue(std::vector<Process> pq) {
 	std::cout <<  "]\n";
 }
 
+std::string get_announcement_prefix(long current_time)  {
+	std::string result = "";
+
+  if (last_announcement != current_time) 
+		result = std::to_string(current_time);
+
+	last_announcement = current_time;
+
+	return result;
+}
+
 void enqueue_newly_arrived(long current_time) {
   for (auto proc : pl) {
 	  if (proc.arrivalTime == current_time) {
-			std::cout << getAnnouncementPrefix(current_time) <<
+			std::cout << get_announcement_prefix(current_time) <<
 			  "Process " << proc.pid << std::endl;
 		      
 			pq.push_back(proc);
@@ -49,7 +60,7 @@ void terminate_completed_process(long current_time) {
 		time_spent_in_memory = current_time - proc.timeAddMemory;
 
 		if (proc.isActive && (time_spent_in_memory >= proc.lifeTime)) {
-			std::cout << getAnnouncementPrefix(current_time)
+			std::cout << get_announcement_prefix(current_time)
         << "Process " << proc.pid << " completes\n";
 
 			proc.isActive = 0;
@@ -71,7 +82,7 @@ void assign_available_mem(long current_time) {
 		Process proc = pq.at(i);
 
 		if (fl.process_fits(proc)) {
-			std::cout << getAnnouncementPrefix(current_time) 
+			std::cout << get_announcement_prefix(current_time) 
         << "MM moves Process " << proc.pid << " to memory\n";
 
     proc.isActive = 1;
@@ -95,15 +106,86 @@ void print_turnaround_time()  {
 	std::cout << "Average Turnaround Time: " << avg << std::endl;
 }
 
-std::string getAnnouncementPrefix(long current_time)  {
-	std::string result = "";
+// get number of processes from file
+int get_num_processes(std::string &file_name) {
+	int num = 0;
+  std::ifstream ifs(file_name);
+  int tmp;
+  
+  while(ifs >> tmp)
+    ++num;
 
-  if (last_announcement != current_time) 
-		result = std::to_string(current_time);
+  if(!ifs.is_open()) {
+    std::cout << "Error opening file!";
+    exit(1);
+  }
+	return num;
+}
 
-	last_announcement = current_time;
+void get_user_input(int &mem, int &page, std::string &filename) {
+	std::cout << "Memory: ";
+  std::cin >> mem;
+  std::cout << "Page size: ";
+  std::cin >> page;
+  std::ifstream ifs;
 
-	return result;
+  if (!(mem % page == 0)) {
+		std::cout << "ERROR: Memory size must be a multiple of the page!";
+	  exit(1);
+	}
+
+  std::cout << "Input file: ";
+  std::cin >> filename;
+  ifs.open(filename);
+  if (!ifs.is_open()) {
+		std::cout << "ERROR: Could not open file!\n";
+    exit(1);
+	}
+
+	ifs.close();
+}
+
+void assign_process_list(std::string &file_name) {
+  long arrival, life_time;
+  int pid, tmp, num_space;
+	int counter = 0;
+	int total_space = 0;
+  int num_procs = get_num_processes(file_name);
+	std::ifstream ifs(file_name);
+
+  if (!ifs.is_open()) {
+	  std::cout << "Error opening file!";
+	  exit(1);
+	}
+
+	// ale space for process array
+	pl = std::vector<Process>(num_procs);
+
+	while (!ifs.eof() && counter < num_procs) {
+    
+		// store values for processes
+		ifs >> pid >> arrival >> life_time >> num_space;
+
+		pl[counter].pid = pid;
+		pl[counter].arrivalTime = arrival;
+		pl[counter].lifeTime = life_time;
+			
+		// get total memory requirements for process
+		total_space = 0;
+		for (int i = 0; i < num_space; ++i) {
+			ifs >> tmp;
+			total_space += tmp;
+		}
+
+		pl[counter].memReqs = total_space;
+		pl[counter].isActive = 0;
+		pl[counter].timeAddMemory = -1;
+		pl[counter].timeDone = -1;
+
+		++counter;
+	}
+
+	ifs.close();
 }
 
 void main_loop() {
@@ -125,34 +207,6 @@ void main_loop() {
 	print_turnaround_time();
 }
 
-void prompt_for_file(std:: string &file) 
-{
-	std::string filename;
-	std::ifstream instream;
-
-	std::cout << "Input file: ";
-  std::cin >> filename;
-  instream.open(filename);
-
-	if (!instream.is_open()) {
-		std::cout << "ERROR: Could not open file!\n";
-    exit(1);
-	}
-}
-void get_user_input(int &mem, int &page, std::string &filepath) {
-	std::cout << "Memory: ";
-  std::cin >> mem;
-  std::cout << "Page size: ";
-  std::cin >> page;
-    
-  if (!mem % page == 0) {
-		std::cout << "ERROR: Memory size must be a multiple of the page!";
-	  exit(1);
-	}
-
-	prompt_for_file(filepath);
-}
-
 int main() {
   int mem_size = 0;
 	int pg_size = 0;
@@ -160,8 +214,8 @@ int main() {
 	std::string file_path;
 
 	get_user_input(mem_size, pg_size, file_path);
-  
-	pl = assignProcessList(file_path);
+	assign_process_list(file_path);
+
 	pq = std::vector<Process>(numOfProcs);
   int num_frames = mem_size / pg_size;
 	fl = FrameList(num_frames, pg_size);
@@ -169,140 +223,4 @@ int main() {
 	main_loop();
 
 	return 0;
-}
-
-
-
-int multipleOneHundred(int t) 
-{
-	return (t % 100) == 0 ? 1 : 0;
-}
-
-int isOneTwoOrThree(int t)
-{
-	return (t >= 1 && t <= 3) ? 1 : 0;
-}
-
-void clearStdin(char* buf) 
-{
-	if (buf[strlen(buf) - 1] != '\n') {
-		int ch;
-		while (((ch = getchar()) != '\n') && (ch != EOF));
-	}
-}
-
-int processNumericInputFromUser(const char* output, int(*func)(int))
-{
-	char buf[10];
-	int success = 0;
-	int res = 0;
-
-	while (!success) {
-		printf("%s: ", output);
-
-		if (fgets(buf, 10, stdin) == NULL) {
-			clearStdin(buf);
-			printf("ERROR: You didn't enter any data!\n");
-
-			continue;
-		}
-
-		if (sscanf(buf, "%d", &res) <= 0) {
-			clearStdin(buf);
-			printf("ERROR: You didn't enter a number!\n");
-
-			continue;
-		}
-
-		if (!(success = (*func)(res))) {
-			clearStdin(buf);
-			printf("ERROR: That number is not a valid choice\n");
-		}
-	}
-
-	return res;
-}
-
-
-
-// prompts for memory size and page size
-void getUserInput(int* mem, int* page, char* filePath) 
-{
-	while (1) {
-		*mem = processNumericInputFromUser(
-			"Memory size", multipleOneHundred);
-
-		*page = processNumericInputFromUser(
-			"Page size (1: 100, 2: 200, 3: 400)", isOneTwoOrThree);
-
-		switch (*page) {
-		case 1: *page = 100; break;
-		case 2: *page = 200; break;
-		case 3: *page = 400; break;
-		}
-
-		if ((*mem) % (*page) == 0) {
-			break;
-		}
-
-		printf("ERROR: Memory size must be a multiple of the page!");
-		printf(" %d is not a multiple of %d, please retry.\n", *mem, *page);
-	}
-
-	promptForFileName(filePath);
-}
-
-// get number of processes from file
-int getNumOfProcessFromFile(FILE* filePtr) {
-	int num = 0;
-
-	fscanf(filePtr, "%d", &num);
-
-	return num;
-}
-
-// stores values processes in process array
-Process* assignProcessList(const char* filePath) {
-	int numSpace;
-	int tmp;
-	int counter = 0;
-	int totalSpace = 0;
-	FILE* filePtr = fopen(filePath, "r");
-
-	numOfProcs = getNumOfProcessFromFile(filePtr);
-
-	// ale space for process array
-	Process* procList = malloc(numOfProcs * sizeof(Process));
-
-	if (!filePtr) {
-		printf("ERROR: Failed to open file %s", filePath);
-		exit(1);
-	}
-
-	while (!feof(filePtr) && counter < numOfProcs) {
-		// store values for processes
-		fscanf(filePtr, "%d %d %d %d",
-			&(procList[counter].pid),
-			&(procList[counter].arrivalTime),
-			&(procList[counter].lifeTime),
-			&numSpace);
-
-		// get total memory requirements for process
-		totalSpace = 0;
-		for (int i = 0; i < numSpace; i++) {
-			fscanf(filePtr, "%d", &tmp);
-			totalSpace += tmp;
-		}
-		procList[counter].memReqs = totalSpace;
-
-		procList[counter].isActive = 0;
-		procList[counter].timeAddMemory = -1;
-		procList[counter].timeDone = -1;
-
-		counter++;
-	}
-
-	fclose(filePtr);
-
-	return procList;
 }
