@@ -21,7 +21,6 @@ private:
   std::vector<Process> pq_;
 
   void update_pl(int pid);
-  void assign_process_list(std::string &filename);
   void print_turnaround_time();
   void enqueue_arrivals();
   void print_process_queue() const;
@@ -51,11 +50,13 @@ MemoryManager::MemoryManager(int mem, int page_size, std::string &filename) :
 	int num_frames = mem / page_size;
 	fl_ = FrameList(num_frames, page_size);
 
-  int num_procs, counter, total_space, life_time, arrival;
-	int pid, tmp, num_space;
-
+  int num_procs;
 	ifs >> num_procs;
 	pl_ = std::vector<Process>(num_procs);
+  
+	int counter = 0;
+	int total_space = 0;
+	int pid, arrival, life_time, num_space, tmp;
 
 	while (!ifs.eof() && counter < num_procs) {
 		// store temp values for processes
@@ -132,12 +133,11 @@ void MemoryManager::assign_available_memory() {
 	for (size_t i = 0; i < pq_.size(); ++i) {
 		Process proc = pq_[i];
 
-		if (fl_.process_fits(proc)) {
+		if (fl_.fits(proc)) {
 			std::cout << get_prefix() 
 				<< "MM moves Process " << proc.get_pid() << " to memory\n";
 			
-		  fl_.fit_process(proc);
-      
+		  fl_.add_process(proc);
 			update_pl(proc.get_pid());
 		
 		  pq_.erase(pq_.begin() + i);

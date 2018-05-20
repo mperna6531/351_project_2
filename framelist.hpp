@@ -15,8 +15,8 @@ private:
   FrameVector frames_;
 public:
   void print();
-  bool process_fits(Process proc);
-  void fit_process(Process proc);
+  bool fits(Process proc);
+  void add_process(Process proc);
   FrameList(int num_frames, int pg_size) :
     num_frames_(num_frames), 
 	page_size_(pg_size),
@@ -26,7 +26,7 @@ public:
   bool empty();
 };
 
-bool FrameList::process_fits(Process proc) {
+bool FrameList::fits(Process proc) {
 int free_frames = 0;
 
   for (auto frame : frames_) 
@@ -36,7 +36,7 @@ int free_frames = 0;
   return ((free_frames * page_size_) >= proc.get_mem_reqs());
 }
 
-void FrameList::fit_process(Process proc) {
+void FrameList::add_process(Process proc) {
 	int remaining_mem = proc.get_mem_reqs();
   int current_page = 1;
   
