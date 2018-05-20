@@ -106,14 +106,14 @@ void print_turnaround_time()  {
 	std::cout << "Average Turnaround Time: " << avg << std::endl;
 }
 
-void get_user_input(int &mem, int &page, std::string &filename) {
+void get_user_input(int &mem, int &page_size, std::string &filename) {
 	std::cout << "Memory: ";
   std::cin >> mem;
   std::cout << "Page size: ";
-  std::cin >> page;
+  std::cin >> page_size;
   std::ifstream ifs;
 
-  if (!(mem % page == 0)) {
+  if (!(mem % page_size == 0)) {
 		std::cout << "ERROR: Memory size must be a multiple of the page!";
 	  exit(1);
 	}
