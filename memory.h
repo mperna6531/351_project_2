@@ -91,8 +91,9 @@ void FrameList::print() {
 		}
 
 		if (frames_[i].assigned()) {
+    
       begin = i * page_size_;
-      end = (i + 1) * page_size_ - 1;
+      end = (i + 1) * page_size_;
 			std::cout << "\t\t" << begin << "-" << end << 
         ": Process: " << frames_[i].process_assigned() << 
         " Page: " << frames_[i].page_num() << std::endl;
@@ -108,7 +109,7 @@ bool FrameList::empty() {
 }
 
 void FrameList::free_by_pid(int pid) {
-	for (auto frame : frames_) 
+	for (auto &frame : frames_) 
 		if (frame.process_assigned() == pid)
 		  frame.free();
 }

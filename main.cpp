@@ -17,8 +17,6 @@ std::vector<Process> pl;
 FrameList fl;
 std::vector<Process> pq;
 
-
-
 void print_proc_queue(std::vector<Process> pq) {
 	std::cout << "\tInput queue: [";
 
@@ -40,10 +38,10 @@ std::string get_announcement_prefix(long current_time)  {
 }
 
 void enqueue_newly_arrived(long current_time) {
-  for (auto proc : pl) {
+  for (auto &proc : pl) {
 	  if (proc.arrivalTime == current_time) {
 			std::cout << get_announcement_prefix(current_time) <<
-			  "Process " << proc.pid << std::endl;
+			  "Process " << proc.pid << " arrives" << std::endl;
 		      
 			pq.push_back(proc);
       print_proc_queue(pq);
@@ -53,46 +51,51 @@ void enqueue_newly_arrived(long current_time) {
 }
 
 void terminate_completed_process(long current_time) {
-	int time_spent_in_memory = 0;
-
 	// dequeue any procs that need it
-	for (auto proc : pl) {
-		time_spent_in_memory = current_time - proc.timeAddMemory;
+	for (int i = 0; i < pl.size(); ++i) {
 
-		if (proc.isActive && (time_spent_in_memory >= proc.lifeTime)) {
-			std::cout << get_announcement_prefix(current_time)
-        << "Process " << proc.pid << " completes\n";
+	  if (pl[i].isActive) {
+			int time_elapsed = current_time - pl[i].timeAddMemory;
+	    if (time_elapsed >= pl[i].lifeTime) {
+			  std::cout << get_announcement_prefix(current_time)
+          << "process " << pl[i].pid << " completes\n";
 
-			proc.isActive = 0;
-			proc.timeDone = current_time;
+			  pl[i].isActive = 0;
+			  pl[i].timeDone = current_time;
 
-			fl.free_by_pid(proc.pid);
+			  fl.free_by_pid(pl[i].pid);
+			  fl.print();
+		  }
+	  }
+  }
+}
 
-			fl.print();
+void update_pl(int pid, int current_time) {
+  for (auto &el : pl) {
+		if (el.pid == pid) {
+		  el.isActive = 1;
+			el.timeAddMemory = current_time;
 		}
 	}
 }
 
 void assign_available_mem(long current_time) {
-	int index, limit;
-	limit = pq.size();
-
 	// enqueue any procs that can be put into mem
 	for (int i = 0; i < pq.size(); ++i) {
-		Process proc = pq.at(i);
+		Process proc = pq[i];
 
 		if (fl.process_fits(proc)) {
 			std::cout << get_announcement_prefix(current_time) 
-        << "MM moves Process " << proc.pid << " to memory\n";
-
-    proc.isActive = 1;
-		proc.timeAddMemory = current_time;
-		fl.fit_process(proc);
-  
-		pq.erase(pq.begin() + i);
-		print_proc_queue(pq);
-    fl.print();
-		}
+				<< "MM moves Process " << proc.pid << " to memory\n";
+			
+		  fl.fit_process(proc);
+      
+			update_pl(proc.pid, current_time);
+		
+		  pq.erase(pq.begin() + i);
+		  print_proc_queue(pq);
+		  fl.print();		
+	  }
 	}
 }
 
@@ -189,6 +192,8 @@ void main_loop() {
 			std::cout << "DEADLOCK: max time reached\n";
 			break;
 		}
+  bool test = fl.empty();
+	bool test_pq = pq.empty();
 
 	} while (!(pq.empty() && fl.empty()));
 
