@@ -2,15 +2,18 @@
 //
 
 #include <iostream>
-#include <memory>
-#include <queue>
+#include <fstream>
 #include <vector>
+#include <string>
 
 #include "process.h"
 #include "memory.h"
 #include "prototypes.h"
+
+
 const int timeMax = 100000;
-int numOfProcs = 0, lastAnnouncement = -1;
+int numOfProcs = 0;
+long last_announcement = -1;
 
 std::vector<Process> pl;
 FrameList fl;
@@ -24,18 +27,18 @@ void print_proc_queue(std::vector<Process> pq) {
 	}
 	std::cout <<  "]\n";
 }
+
 void enqueue_newly_arrived(long current_time) {
-   for (auto proc : pl) {
-	    if (proc.arrivalTime == current_time) {
-			  std::cout << getAnnouncementPrefix(current_time) <<
-			    "Process " << proc.pid << std::endl;
+  for (auto proc : pl) {
+	  if (proc.arrivalTime == current_time) {
+			std::cout << getAnnouncementPrefix(current_time) <<
+			  "Process " << proc.pid << std::endl;
 		      
-			  pq.push_back(proc);
-        print_proc_queue(pq);
-        fl.print();
-		  }
-    
+			pq.push_back(proc);
+      print_proc_queue(pq);
+      fl.print();
 		}
+	}
 }
 
 void terminate_completed_process(long current_time) {
@@ -82,6 +85,27 @@ void assign_available_mem(long current_time) {
 	}
 }
 
+void print_turnaround_time()  {
+	float total = 0;
+
+	for (auto proc : pl) 
+		total += proc.timeDone - proc.arrivalTime;
+	
+  float avg = total / pl.size();
+	std::cout << "Average Turnaround Time: " << avg << std::endl;
+}
+
+std::string getAnnouncementPrefix(long current_time)  {
+	std::string result = "";
+
+  if (last_announcement != current_time) 
+		result = std::to_string(current_time);
+
+	last_announcement = current_time;
+
+	return result;
+}
+
 void main_loop() {
 	long current_time = 0;
 	while (!pq.empty() && !fl.empty()) {
@@ -97,87 +121,57 @@ void main_loop() {
 			break;
 		}
 	}
-	printTurnaroundTime();
+
+	print_turnaround_time();
+}
+
+void prompt_for_file(std:: string &file) 
+{
+	std::string filename;
+	std::ifstream instream;
+
+	std::cout << "Input file: ";
+  std::cin >> filename;
+  instream.open(filename);
+
+	if (!instream.is_open()) {
+		std::cout << "ERROR: Could not open file!\n";
+    exit(1);
+	}
+}
+void get_user_input(int &mem, int &page, std::string &filepath) {
+	std::cout << "Memory: ";
+  std::cin >> mem;
+  std::cout << "Page size: ";
+  std::cin >> page;
+    
+  if (!mem % page == 0) {
+		std::cout << "ERROR: Memory size must be a multiple of the page!";
+	  exit(1);
+	}
+
+	prompt_for_file(filepath);
 }
 
 int main() {
-	int pageSize = 0;
-	int memSize = 0;
+  int mem_size = 0;
+	int pg_size = 0;
+	
+	std::string file_path;
 
-	char* filePath = malloc(100 * sizeof(char));
+	get_user_input(mem_size, pg_size, file_path);
+  
+	pl = assignProcessList(file_path);
+	pq = std::vector<Process>(numOfProcs);
+  int num_frames = mem_size / pg_size;
+	fl = FrameList(num_frames, pg_size);
 
-	getUserInput(&memSize, &pageSize, filePath);
-
-	procList = assignProcessList(filePath);
-
-	queue = createProcQueue(numOfProcs);
-
-	framelist = createFrameList(memSize / pageSize, pageSize);
-
-	mainLoop();
+	main_loop();
 
 	return 0;
 }
 
 
-
-void assignAvailableMemoryWaitingProcs(int currentTime)
-{
-	int i, index, limit;
-	Process* proc;
-
-	limit = queue->size;
-
-	// enqueue any procs that can be put into mem
-	for (i = 0; i < limit; i += 1) {
-		index = iterateQueueIndex(queue, i);
-		proc = queue->elements[index];
-
-		if (procFitMemory(framelist, proc)) {
-			printf("%sMM moves Process %d to memory\n",
-				getAnnouncementPrefix(currentTime),
-				proc->pid);
-
-			fitProcMemory(framelist, proc);
-
-			proc->isActive = 1;
-			proc->timeAddMemory = currentTime;
-
-			dequeueProcIndex(queue, i);
-			printProcQueue(queue);
-			printFrameList(framelist);
-		}
-	}
-}
-
-char* getAnnouncementPrefix(int currentTime) 
-{
-	char* result;
-
-	result = malloc(20 * sizeof(char));
-
-	if (lastAnnouncement == currentTime) {
-		sprintf(result, "\t");
-	}
-	else {
-		sprintf(result, "t = %d: ", currentTime);
-	}
-
-	lastAnnouncement = currentTime;
-
-	return result;
-}
-
-void print_turnaround_times() 
-{
-	float total = 0;
-
-	for (int i = 0; i < numOfProcs; i += 1) {
-		total += procList[i].timeDone - procList[i].arrivalTime;
-	}
-
-	printf("Average Turnaround Time: %2.2f\n", total / numOfProcs);
-}
 
 int multipleOneHundred(int t) 
 {
@@ -229,36 +223,7 @@ int processNumericInputFromUser(const char* output, int(*func)(int))
 	return res;
 }
 
-void promptForFileName(char* res) 
-{
-	char buf[100];
-	FILE* fp;
 
-	while (1) {
-		printf("Input file: ");
-
-		if (fgets(buf, 100, stdin) == NULL) {
-			clearStdin(buf);
-			printf("ERROR: You didn't enter any data!\n");
-
-			continue;
-		}
-
-		if (sscanf(buf, "%s", res) <= 0) {
-			clearStdin(buf);
-			printf("ERROR: You didn't enter a string!\n");
-
-			continue;
-		}
-
-		if (!(fp = fopen(res, "r"))) {
-			perror("ERROR: Could not open file!\n");
-		}
-		else {
-			break;
-		}
-	}
-}
 
 // prompts for memory size and page size
 void getUserInput(int* mem, int* page, char* filePath) 
