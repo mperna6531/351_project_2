@@ -82,6 +82,7 @@ void FrameList::print() {
 	for (int i = 0; i < frames_.size(); ++i) {
 		if (!free_block && !frames_[i].assigned()) {
 			free_block = true;
+      start_free = i;
 		} else if (free_block && frames_[i].assigned()) {
 			free_block = false;
       begin = start_free * page_size_;
