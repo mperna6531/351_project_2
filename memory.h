@@ -46,7 +46,7 @@ public:
     num_frames_(num_frames), 
 	page_size_(pg_size),
 	frames_(pg_size) {}
-  FrameList();
+  FrameList() {};
   void free_by_pid(int pid);
   bool empty();
 };
