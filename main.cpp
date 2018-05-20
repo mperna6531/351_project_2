@@ -74,7 +74,7 @@ void terminate_completed_process(long current_time) {
 }
 
 void assign_available_mem(long current_time) {
-	int i, index, limit;
+	int index, limit;
 	limit = pq.size();
 
 	// enqueue any procs that can be put into mem
