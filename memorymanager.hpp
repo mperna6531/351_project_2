@@ -1,3 +1,6 @@
+#ifndef MEMORYMANAGER_HPP
+#define MEMORYMANAGER_HPP
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -103,9 +106,8 @@ std::string MemoryManager::get_prefix() {
 }
 
 void MemoryManager::terminate_completed_processes() {
-	// dequeue any procs that need it
+	// dequeue any processes that have completed their runtime
 	for (size_t i = 0; i < pl_.size(); ++i) {
-
 	  if (pl_[i].active()) {
 			int time_elapsed = current_time_ - pl_[i].get_load_time();
 	    if (time_elapsed >= pl_[i].get_life()) {
@@ -156,7 +158,6 @@ void MemoryManager::print_turnaround_time()  {
 }
 
 void MemoryManager::simulate() {
-	
 	do { 
 		enqueue_arrivals();
     terminate_completed_processes();
@@ -167,8 +168,9 @@ void MemoryManager::simulate() {
 			std::cout << "DEADLOCK: max time reached\n";
 			break;
 		}
-
 	} while (!(pq_.empty() && fl_.empty()));
 
 	print_turnaround_time();
 }
+
+#endif

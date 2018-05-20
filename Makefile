@@ -1,4 +1,5 @@
 #Makefile
+
 CXX=g++
 CXXFLAGS=-std=c++1y -Wall -pedantic -g -o
 PROG=mem_sim

@@ -1,5 +1,5 @@
-#ifndef MEMORY_H_
-#define MEMORY_H_
+#ifndef FRAME_LIST_HPP
+#define FRAME_LIST_HPP
 
 #include <iostream>
 #include <vector>

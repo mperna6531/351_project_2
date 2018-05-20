@@ -1,5 +1,5 @@
-#ifndef PROCESS_H
-#define PROCESS_H
+#ifndef PROCESS_HPP
+#define PROCESS_HPP
 
 class Process {
 private:

@@ -1,3 +1,6 @@
+#ifndef FRAME_HPP
+#define FRAME_HPP
+
 class Frame {
 private:
   bool assigned_;
@@ -37,3 +40,5 @@ int Frame::process_assigned() { return proc_assign_; }
 int Frame::page_num() { return page_num_; }
 
 bool Frame::assigned() { return assigned_; }
+
+#endif
