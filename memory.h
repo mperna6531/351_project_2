@@ -23,7 +23,7 @@ public:
     assigned_ = true;
     proc_assign_ = pid;
     page_num_ = page_num;
-    }
+  }
   void free() { 
     assigned_ = false;
     int proc_assign_ = 0;
@@ -55,18 +55,18 @@ int free_frames = 0;
 
   for (auto frame : frames_) 
     if (!frame.assigned()) 
-			++free_frames;
+			++free_frames; 
     
-  return ((free_frames * page_size_) >= proc.memReqs);
+  return ((free_frames * page_size_) >= proc.get_mem_reqs());
 }
 
 void FrameList::fit_process(Process proc) {
-	int remaining_mem = proc.memReqs;
+	int remaining_mem = proc.get_mem_reqs();
   int current_page = 1;
   
   for (auto &frame : frames_) {
 		if (!frame.assigned() && remaining_mem > 0) {
-		  frame = Frame(true, proc.pid, current_page++);
+		  frame = Frame(true, proc.get_pid(), current_page++);
 			remaining_mem -= page_size_;
 		}
   }
@@ -83,21 +83,21 @@ void FrameList::print() {
 		if (!free_block && !frames_[i].assigned()) {
 			free_block = true;
       start_free = i;
-		} else if (free_block && frames_[i].assigned()) {
+		} else if (free_block && (frames_[i].assigned() || (i == (frames_.size() - 1)))) {
 			free_block = false;
       begin = start_free * page_size_;
-      end = i * page_size_ - 1;
-			std::cout << "\t\t" << begin << "-" << end << ": Free frames\n";
+      end = (i + 1) * page_size_ - 1;
+			std::cout << "\t\t" << begin << "-" << end << ": Free frame(s)\n";
 		}
 
 		if (frames_[i].assigned()) {
-    
       begin = i * page_size_;
-      end = (i + 1) * page_size_;
+      end = (i + 1) * page_size_ - 1;
 			std::cout << "\t\t" << begin << "-" << end << 
         ": Process: " << frames_[i].process_assigned() << 
         " Page: " << frames_[i].page_num() << std::endl;
 		}
+
 	}
 }
 
