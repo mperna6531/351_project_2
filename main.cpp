@@ -105,65 +105,6 @@ void print_turnaround_time()  {
 	std::cout << "Average Turnaround Time: " << avg << std::endl;
 }
 
-void get_user_input(int &mem, int &page_size, std::string &filename) {
-	std::cout << "Memory: ";
-  std::cin >> mem;
-  std::cout << "Page size: ";
-  std::cin >> page_size;
-  std::ifstream ifs;
-
-  if (!(mem % page_size == 0)) {
-		std::cout << "ERROR: Memory size must be a multiple of the page!";
-	  exit(1);
-	}
-
-  std::cout << "Input file: ";
-  std::cin >> filename;
-  ifs.open(filename);
-
-  if (!ifs.is_open()) {
-		std::cout << "ERROR: Could not open file!\n";
-    exit(1);
-	}
-
-	ifs.close();
-}
-
-void assign_process_list(std::string &file_name) {
-  long arrival, life_time;
-  int pid, tmp, num_space;
-	int counter = 0;
-	int total_space = 0;
-  int num_procs = 0;
-
-	std::ifstream ifs(file_name);
-
-  if (!ifs.is_open()) {
-	  std::cout << "Error opening file!";
-	  exit(1);
-	}
-  
-  ifs >> num_procs;
-	pl = std::vector<Process>(num_procs);
-
-	while (!ifs.eof() && counter < num_procs) {
-    
-		// store temp values for processes
-		ifs >> pid >> arrival >> life_time >> num_space;
-			
-		total_space = 0;
-		for (int i = 0; i < num_space; ++i) {
-			ifs >> tmp;
-			total_space += tmp;
-		}
-
-		Process proc(pid, arrival, life_time, total_space);
-		pl[counter++] = proc;
-	}
-
-	ifs.close();
-}
-
 void main_loop() {
 	long current_time = 0;
 
@@ -187,16 +128,69 @@ void main_loop() {
 }
 
 int main() {
-  int mem_size = 0;
-	int pg_size = 0;
+
+	int memSize = 0;
+	int pgSize = 0;
 	
-	std::string file_path;
+	//User input
+	std::string fileInput;
+	
+	std::cout << "Memory size: ";
+	std::cin >> memSize;
+	std::cout << "Page size: ";
+	std::cin >> pgSize;
+	std::ifstream ifs;
 
-	get_user_input(mem_size, pg_size, file_path);
-	assign_process_list(file_path);
+	while (!(memSize % pgSize == 0)) {
+		std::cout << "Error: Memory size must be a multiple of page size." << std::endl;
+		std::cout << "Please re-enter memory size and page size." << std::endl;
+		std::cout << "Memory size: ";
+		std::cin >> memSize;
+		std::cout << "Page size: ";
+		std::cin >> pgSize;
+	}
 
-  int num_frames = mem_size / pg_size;
-	fl = FrameList(num_frames, pg_size);
+	std::cout << "Input file: ";
+	std::cin >> fileInput;
+	ifs.open(fileInput);
+
+	while (!ifs.is_open()) {
+		std::cout << "Error: File could not be opened." << std::endl;
+		std::cout << "Please input the correct filename." << std::endl;
+		std::cout << "Input file: ";
+		std::cin >> fileInput;
+		ifs.open(fileInput);
+	}
+
+	//Process file input
+	long arrival, life_time;
+	int pid, tmp, num_space;
+	int counter = 0;
+	int total_space = 0;
+	int num_procs = 0;
+  
+	ifs >> num_procs;
+	pl = std::vector<Process>(num_procs);
+
+	while (!ifs.eof() && counter < num_procs) {
+    
+		// store temp values for processes
+		ifs >> pid >> arrival >> life_time >> num_space;
+			
+		total_space = 0;
+		for (int i = 0; i < num_space; ++i) {
+			ifs >> tmp;
+			total_space += tmp;
+		}
+
+		Process proc(pid, arrival, life_time, total_space);
+		pl[counter++] = proc;
+	}
+
+	ifs.close();
+
+	int x = memSize / pgSize;
+	fl = FrameList(x, pgSize);
 
 	main_loop();
 
