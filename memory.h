@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <memory>
 #include <vector>
 
 #include "process.h"
@@ -34,7 +33,7 @@ public:
 
 class FrameList {
 private:
-  using FrameVector = std::vector<std::shared_ptr<Frame>>;
+  using FrameVector = std::vector<Frame>;
   FrameVector frames_;
   int num_frames_;
   int page_size_;
@@ -55,7 +54,7 @@ bool FrameList::process_fits(Process proc) {
 int free_frames = 0;
 
   for (auto frame : frames_) 
-    if (!frame->assigned()) 
+    if (!frame.assigned()) 
 			++free_frames;
     
   return (free_frames * page_size_) >= proc.memReqs;
@@ -66,8 +65,8 @@ void FrameList::fit_process(Process proc) {
   int current_page = 1;
   
   for (auto &frame : frames_) {
-		if (!frame->assigned()) {
-		  frame = std::shared_ptr<Frame>(new Frame(true, proc.pid, current_page++));
+		if (!frame.assigned()) {
+		  frame = Frame(true, proc.pid, current_page++);
 			remaining_mem -= page_size_;
 		}
   }
@@ -81,34 +80,34 @@ void FrameList::print() {
 	std::cout << "\tMemory map:\n";
  
 	for (int i = 0; i < frames_.size(); ++i) {
-		if (!free_block && !frames_[i]->assigned()) {
+		if (!free_block && !frames_[i].assigned()) {
 			free_block = true;
-		} else if (free_block && frames_[i]->assigned()) {
+		} else if (free_block && frames_[i].assigned()) {
 			free_block = false;
       begin = start_free * page_size_;
       end = i * page_size_ - 1;
 			std::cout << "\t\t" << begin << "-" << end << ": Free frames\n";
 		}
 
-		if (frames_[i]->assigned()) {
+		if (frames_[i].assigned()) {
       begin = i * page_size_;
       end = i * page_size_ - 1;
 			std::cout << "\t\t" << begin << "-" << end << 
-        ": Process: " << frames_[i]->process_assigned() << 
-        " Page: " << frames_[i]->page_num() << std::endl;
+        ": Process: " << frames_[i].process_assigned() << 
+        " Page: " << frames_[i].page_num() << std::endl;
 		}
 	}
 }
 
 bool FrameList::empty() {
 	for (auto frame : frames_)
-    if (frame->assigned())
+    if (frame.assigned())
       return false;
   return true;
 }
 
 void FrameList::free_by_pid(int pid) {
 	for (auto frame : frames_) 
-		if (frame->process_assigned() == pid)
-		  frame->free();
+		if (frame.process_assigned() == pid)
+		  frame.free();
 }
