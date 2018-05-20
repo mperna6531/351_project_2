@@ -65,7 +65,7 @@ void FrameList::fit_process(Process proc) {
   int current_page = 1;
   
   for (auto &frame : frames_) {
-		if (!frame.assigned()) {
+		if (!frame.assigned() && remaining_mem > 0) {
 		  frame = Frame(true, proc.pid, current_page++);
 			remaining_mem -= page_size_;
 		}
@@ -91,7 +91,7 @@ void FrameList::print() {
 
 		if (frames_[i].assigned()) {
       begin = i * page_size_;
-      end = i * page_size_ - 1;
+      end = (i + 1) * page_size_ - 1;
 			std::cout << "\t\t" << begin << "-" << end << 
         ": Process: " << frames_[i].process_assigned() << 
         " Page: " << frames_[i].page_num() << std::endl;
