@@ -13,19 +13,12 @@ public:
   void free();
 };
 
-int Frame::process_assigned() { return proc_assign_; }
-
-
 Frame::Frame(bool assigned, int proc, int page) : 
   assigned_(assigned), 
 	proc_assign_(proc), 
 	page_num_(page) {}
 
 Frame::Frame() : assigned_(false) {}
-
-int Frame::page_num() { return page_num_; }
-
-bool Frame::assigned() { return assigned_; }
 
 void Frame::assign(int pid, int page_num) {
   assigned_ = true;
@@ -38,3 +31,9 @@ void Frame::free() {
   int proc_assign_ = 0;
   int page_num_ = 0;
 }
+
+int Frame::process_assigned() { return proc_assign_; }
+
+int Frame::page_num() { return page_num_; }
+
+bool Frame::assigned() { return assigned_; }
