@@ -17,6 +17,8 @@ std::vector<Process> pl;
 FrameList fl;
 std::vector<Process> pq;
 
+
+
 void print_proc_queue(std::vector<Process> pq) {
 	std::cout << "\tInput queue: [";
 
@@ -27,10 +29,10 @@ void print_proc_queue(std::vector<Process> pq) {
 }
 
 std::string get_announcement_prefix(long current_time)  {
-	std::string result = "";
+	std::string result = "\t";
 
   if (last_announcement != current_time) 
-		result = std::to_string(current_time);
+		result = "t = " + std::to_string(current_time) + ", ";
 
 	last_announcement = current_time;
 
@@ -188,7 +190,7 @@ void main_loop() {
 			break;
 		}
 
-	} while (!pq.empty() && !fl.empty());
+	} while (!(pq.empty() && fl.empty()));
 
 	print_turnaround_time();
 }

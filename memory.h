@@ -57,7 +57,7 @@ int free_frames = 0;
     if (!frame.assigned()) 
 			++free_frames;
     
-  return (free_frames * page_size_) >= proc.memReqs;
+  return ((free_frames * page_size_) >= proc.memReqs);
 }
 
 void FrameList::fit_process(Process proc) {
