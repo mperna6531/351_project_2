@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MEMORY_H_
+#define MEMORY_H_
 
 #include <iostream>
 #include <vector>
@@ -113,3 +114,5 @@ void FrameList::free_by_pid(int pid) {
 		if (frame.process_assigned() == pid)
 		  frame.free();
 }
+
+#endif

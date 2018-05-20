@@ -1,11 +1,6 @@
-// CPSC 351 Assignment 2.cpp : Defines the entry point for the console application.
-//
+// main.cpp
 
 #include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-
 #include "process.h"
 #include "memory.h"
 #include "memorymanager.h"

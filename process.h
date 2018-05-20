@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PROCESS_H
+#define PROCESS_H
 
 class Process {
 private:
@@ -65,3 +66,5 @@ long Process::get_load_time() const {
 int Process::get_pid() const {
   return pid_;
 }
+
+#endif
