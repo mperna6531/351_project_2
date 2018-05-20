@@ -8,8 +8,6 @@
 
 #include "process.h"
 #include "memory.h"
-#include "prototypes.h"
-
 
 const int timeMax = 100000;
 int numOfProcs = 0;
@@ -20,7 +18,7 @@ FrameList fl;
 std::vector<Process> pq;
 
 void print_proc_queue(std::vector<Process> pq) {
-	std::cout << "\tInput queue: [ ";
+	std::cout << "\tInput queue: [";
 
 	for (auto el : pq) {
    std::cout << el.pid;
@@ -106,22 +104,6 @@ void print_turnaround_time()  {
 	std::cout << "Average Turnaround Time: " << avg << std::endl;
 }
 
-// get number of processes from file
-int get_num_processes(std::string &file_name) {
-	int num = 0;
-  std::ifstream ifs(file_name);
-  int tmp;
-  
-  while(ifs >> tmp)
-    ++num;
-
-  if(!ifs.is_open()) {
-    std::cout << "Error opening file!";
-    exit(1);
-  }
-	return num;
-}
-
 void get_user_input(int &mem, int &page, std::string &filename) {
 	std::cout << "Memory: ";
   std::cin >> mem;
@@ -137,6 +119,7 @@ void get_user_input(int &mem, int &page, std::string &filename) {
   std::cout << "Input file: ";
   std::cin >> filename;
   ifs.open(filename);
+
   if (!ifs.is_open()) {
 		std::cout << "ERROR: Could not open file!\n";
     exit(1);
@@ -150,14 +133,16 @@ void assign_process_list(std::string &file_name) {
   int pid, tmp, num_space;
 	int counter = 0;
 	int total_space = 0;
-  int num_procs = get_num_processes(file_name);
+  int num_procs = 0;
+
 	std::ifstream ifs(file_name);
 
   if (!ifs.is_open()) {
 	  std::cout << "Error opening file!";
 	  exit(1);
 	}
-
+  
+  ifs >> num_procs;
 	// ale space for process array
 	pl = std::vector<Process>(num_procs);
 
@@ -190,8 +175,8 @@ void assign_process_list(std::string &file_name) {
 
 void main_loop() {
 	long current_time = 0;
-	while (!pq.empty() && !fl.empty()) {
 
+	do { 
 		enqueue_newly_arrived(current_time);
     terminate_completed_process(current_time);
 		assign_available_mem(current_time);
@@ -202,7 +187,8 @@ void main_loop() {
 			std::cout << "DEADLOCK: max time reached\n";
 			break;
 		}
-	}
+
+	} while (!pq.empty() && !fl.empty());
 
 	print_turnaround_time();
 }
