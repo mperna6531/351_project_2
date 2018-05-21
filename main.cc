@@ -9,10 +9,8 @@ int main() {
 
 	std::cout << "Memory size: ";
 	std::cin >> memSize;
-	std::cout << "Page size: ";
 	std::cout << "Page size (1:100, 2:200, 3:300): ";
 
-  
   while (!validPage) {
 	  std::cin.ignore();
 	  std::cin >> pageSize;
