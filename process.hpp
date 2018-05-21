@@ -3,49 +3,50 @@
 
 class Process {
 private:
-	int pid_;
+	int processId;
 	int life_;
-	int mem_req_;
-  long arrival_time_;
+	int memoryReq;
+	long arriveTime;
 	long load_time_;
-  long time_done_;
+	long time_done_;
 	bool active_;
+
 public:
   Process(int pid, int arrival_time, int life, int mem_req);
-  void load_to_mem(long current_time);
+  void loadToMemory(long currTime);
   bool active();
   int get_pid() const;
   int get_life() const;
   int get_arrival() const;
-  long get_load_time() const;
-  long get_time_done() const;
-  int get_mem_reqs() const;
-  void end(long current_time);
+  long getLoadTime() const;
+  long getTimeDone() const;
+  int getMemoryReqs() const;
+  void end(long currTime);
   Process() {}
 };
 
 Process::Process(int pid, int arrival_time, int life, int mem_reqs) :
-  pid_(pid),
+  processId(pid),
   life_(life),
-  mem_req_(mem_reqs),
-  arrival_time_(arrival_time),
+  memoryReq(mem_reqs),
+  arriveTime(arrival_time),
   active_(false) {}
 
-long Process::get_time_done() const {
+long Process::getTimeDone() const {
   return time_done_;
 }
 
-int Process::get_mem_reqs() const {
-  return mem_req_;
+int Process::getMemoryReqs() const {
+  return memoryReq;
 }
 
-void Process::load_to_mem(long current_time) {
-  load_time_ = current_time;
+void Process::loadToMemory(long currTime) {
+  load_time_ = currTime;
   active_ = true;
 }
 
-void Process::end(long current_time) {
-  time_done_ = current_time;
+void Process::end(long currTime) {
+  time_done_ = currTime;
   active_ = 0;
 }
 
@@ -58,16 +59,16 @@ bool Process::active() {
 }
 
 int Process::get_arrival() const {
-  return arrival_time_;
+  return arriveTime;
 }
 
-long Process::get_load_time() const {
+long Process::getLoadTime() const {
   return load_time_;
 }
 
 
 int Process::get_pid() const {
-  return pid_;
+  return processId;
 }
 
 #endif

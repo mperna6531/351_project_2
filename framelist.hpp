@@ -33,11 +33,11 @@ int free_frames = 0;
     if (!frame.assigned()) 
 			++free_frames; 
     
-  return ((free_frames * page_size_) >= proc.get_mem_reqs());
+  return ((free_frames * page_size_) >= proc.getMemoryReqs());
 }
 
 void FrameList::add_process(Process proc) {
-	int remaining_mem = proc.get_mem_reqs();
+	int remaining_mem = proc.getMemoryReqs();
   int current_page = 1;
   
   for (auto &frame : frames_) {

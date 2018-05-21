@@ -108,7 +108,7 @@ std::string MemoryManager::get_prefix() {
 void MemoryManager::endDoneProcesses() {
 	for (size_t i = 0; i < pl_.size(); ++i) {
 	  if (pl_[i].active()) {
-			int time_elapsed = currTime - pl_[i].get_load_time();
+			int time_elapsed = currTime - pl_[i].getLoadTime();
 	    if (time_elapsed >= pl_[i].get_life()) {
 			  std::cout << get_prefix()
           << "process " << pl_[i].get_pid() << " completes\n";
@@ -124,7 +124,7 @@ void MemoryManager::endDoneProcesses() {
 void MemoryManager::update_pl(int pid) {
   for (auto &el : pl_) 
 		if (el.get_pid() == pid) 
-		  el.load_to_mem(currTime);
+		  el.loadToMemory(currTime);
 }
 
 void MemoryManager::assgnAvailMem() {
@@ -149,7 +149,7 @@ void MemoryManager::assgnAvailMem() {
 void MemoryManager::printTurnaroundTime()  {
 	float total = 0;
 	for (auto proc : pl_) 
-		total += proc.get_time_done() - proc.get_arrival();
+		total += proc.getTimeDone() - proc.get_arrival();
 	
   float avg = total / pl_.size();
 	std::cout << "Average Turnaround Time: " << avg << std::endl;
@@ -158,7 +158,7 @@ void MemoryManager::printTurnaroundTime()  {
 void MemoryManager::simulate() {
 	do { 
 		queueArrival();
-    endDoneProcesses();
+		endDoneProcesses();
 		assgnAvailMem();
 		++currTime;
 
