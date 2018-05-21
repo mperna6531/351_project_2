@@ -34,18 +34,17 @@ public:
 
 MemoryManager::MemoryManager(int mem, int page_size, std::string &filename) :
   current_time_(0), last_announcement_(0) {
-  std::ifstream ifs;	
+	std::ifstream ifs;	
 
-  if (!(mem % page_size == 0)) {
-	  std::cout << "ERROR: Memory size must be a multiple of the page!";
-	  exit(1);
-  }
+	ifs.open(filename);
 
-  ifs.open(filename);
-  if (!ifs.is_open()) {
-	std::cout << "ERROR: Could not open file!\n";
-    exit(1);
-  }
+	while (!ifs.is_open()) {
+		std::cout << "Error: File could not be opened." << std::endl;
+		std::cout << "Please input the correct filename." << std::endl;
+		std::cout << "Input file: ";
+		std::cin >> filename;
+		ifs.open(filename);
+	}
 
 	int num_frames = mem / page_size;
 	fl_ = FrameList(num_frames, page_size);
