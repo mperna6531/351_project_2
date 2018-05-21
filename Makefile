@@ -8,6 +8,6 @@ HEADERS=process.hpp frame.hpp framelist.hpp memorymanager.hpp
 
 all: $(SOURCES) $(HEADERS)
 	$(CXX) $(CXXFLAGS) $(PROG) $(SOURCES)
-
+	./$(PROG)
 clean:
 	rm -f $(PROG)
