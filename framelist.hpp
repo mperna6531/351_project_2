@@ -62,7 +62,7 @@ void FrameList::print() {
 		} else if (free_block && (frames_[i].assigned() || (i == (frames_.size() - 1)))) {
 			free_block = false;
       begin = start_free * page_size_;
-      end = (i + 1) * page_size_ - 1;
+      end = i * page_size_ - 1;
 			std::cout << "\t\t" << begin << "-" << end << ": Free frame(s)\n";
 		}
 
