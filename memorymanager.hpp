@@ -50,24 +50,23 @@ MemoryManager::MemoryManager(int mem, int page_size, std::string &filename) :
 	int num_frames = mem / page_size;
 	fl_ = FrameList(num_frames, page_size);
 
-  int num_procs;
-	ifs >> num_procs;
-	pl_ = std::vector<Process>(num_procs);
+  int numOfProcesses;
+	ifs >> numOfProcesses;
+	pl_ = std::vector<Process>(numOfProcesses);
   
-	int counter = 0;
-	int total_space = 0;
-	int pid, arrival, life_time, num_space, tmp;
+	int processCount = 0, total_space = 0;
+	int processId, arrival, lifetime, space;
+	int temp;
 
-	while (!ifs.eof() && counter < num_procs) {
-		// store temp values for processes
-		ifs >> pid >> arrival >> life_time >> num_space;
+	while (!ifs.eof() && processCount < numOfProcesses) {
+		ifs >> processId >> arrival >> lifetime >> space;
 		total_space = 0;
-		for (int i = 0; i < num_space; ++i) {
-			ifs >> tmp;
-			total_space += tmp;
+		for (int i = 0; i < space; ++i) {
+			ifs >> temp;
+			total_space += temp;
 		}
-		Process proc(pid, arrival, life_time, total_space);
-		pl_[counter++] = proc;
+		Process proc(processId, arrival, lifetime, total_space);
+		pl_[processCount++] = proc;
   }
 	ifs.close();
 }
@@ -107,7 +106,6 @@ std::string MemoryManager::get_prefix() {
 }
 
 void MemoryManager::endDoneProcesses() {
-	// dequeue any processes that have completed their runtime
 	for (size_t i = 0; i < pl_.size(); ++i) {
 	  if (pl_[i].active()) {
 			int time_elapsed = currTime - pl_[i].get_load_time();
