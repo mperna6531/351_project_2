@@ -13,27 +13,28 @@
 class MemoryManager {
 private:
   const int MAX_TIME = 100000;
-  long current_time_;
-  long last_announcement_;
+  long currTime;
+  long lastTime;
 
   std::vector<Process> pl_;
   FrameList fl_;
   std::vector<Process> pq_;
 
   void update_pl(int pid);
-  void print_turnaround_time();
-  void enqueue_arrivals();
-  void print_process_queue() const;
-  void assign_available_memory();
-  void terminate_completed_processes();
-	std::string get_prefix();
+  void printTurnaroundTime();
+  void queueArrival();
+  void printQueue() const;
+  void assgnAvailMem();
+  void endDoneProcesses();
+  std::string get_prefix();
+
 public:
   MemoryManager(int mem, int page_size, std::string &filename);
   void simulate();
 };
 
 MemoryManager::MemoryManager(int mem, int page_size, std::string &filename) :
-  current_time_(0), last_announcement_(0) {
+  currTime(0), lastTime(0) {
 	std::ifstream ifs;	
 
 	ifs.open(filename);
@@ -71,21 +72,21 @@ MemoryManager::MemoryManager(int mem, int page_size, std::string &filename) :
 	ifs.close();
 }
 
-void MemoryManager::enqueue_arrivals() {
+void MemoryManager::queueArrival() {
   for (auto &proc : pl_) {
-	  if (proc.get_arrival() == current_time_) {
+	  if (proc.get_arrival() == currTime) {
 			std::cout << get_prefix() <<
 			  "Process " << proc.get_pid() << " arrives" << std::endl;
 		      
 			pq_.push_back(proc);
-      print_process_queue();
+      printQueue();
 
       fl_.print();
 		}
 	}
 }
 
-void MemoryManager::print_process_queue() const {
+void MemoryManager::printQueue() const {
 	std::cout << "\tInput queue: [";
 
 	for (auto el : pq_) {
@@ -97,24 +98,24 @@ void MemoryManager::print_process_queue() const {
 std::string MemoryManager::get_prefix() {
 	std::string result = "\t";
 
-  if (last_announcement_ != current_time_) 
-		result = "t = " + std::to_string(current_time_) + ", ";
+  if (lastTime != currTime) 
+		result = "t = " + std::to_string(currTime) + ", ";
 
-	last_announcement_ = current_time_;
+	lastTime = currTime;
 
 	return result;
 }
 
-void MemoryManager::terminate_completed_processes() {
+void MemoryManager::endDoneProcesses() {
 	// dequeue any processes that have completed their runtime
 	for (size_t i = 0; i < pl_.size(); ++i) {
 	  if (pl_[i].active()) {
-			int time_elapsed = current_time_ - pl_[i].get_load_time();
+			int time_elapsed = currTime - pl_[i].get_load_time();
 	    if (time_elapsed >= pl_[i].get_life()) {
 			  std::cout << get_prefix()
           << "process " << pl_[i].get_pid() << " completes\n";
 
-			  pl_[i].end(current_time_);
+			  pl_[i].end(currTime);
 			  fl_.free_by_pid(pl_[i].get_pid());
 			  fl_.print();
 		  }
@@ -125,10 +126,10 @@ void MemoryManager::terminate_completed_processes() {
 void MemoryManager::update_pl(int pid) {
   for (auto &el : pl_) 
 		if (el.get_pid() == pid) 
-		  el.load_to_mem(current_time_);
+		  el.load_to_mem(currTime);
 }
 
-void MemoryManager::assign_available_memory() {
+void MemoryManager::assgnAvailMem() {
 	for (size_t i = 0; i < pq_.size(); ++i) {
 		Process proc = pq_[i];
 
@@ -140,14 +141,14 @@ void MemoryManager::assign_available_memory() {
 			update_pl(proc.get_pid());
 		
 		  pq_.erase(pq_.begin() + i);
-		  print_process_queue();
-			assign_available_memory();
+		  printQueue();
+			assgnAvailMem();
 		  fl_.print();		
 	  }
 	}
 }
 
-void MemoryManager::print_turnaround_time()  {
+void MemoryManager::printTurnaroundTime()  {
 	float total = 0;
 	for (auto proc : pl_) 
 		total += proc.get_time_done() - proc.get_arrival();
@@ -158,18 +159,18 @@ void MemoryManager::print_turnaround_time()  {
 
 void MemoryManager::simulate() {
 	do { 
-		enqueue_arrivals();
-    terminate_completed_processes();
-		assign_available_memory();
-		++current_time_;
+		queueArrival();
+    endDoneProcesses();
+		assgnAvailMem();
+		++currTime;
 
-		if (current_time_ > MAX_TIME) {
+		if (currTime > MAX_TIME) {
 			std::cout << "DEADLOCK: max time reached\n";
 			break;
 		}
 	} while (!(pq_.empty() && fl_.empty()));
 
-	print_turnaround_time();
+	printTurnaroundTime();
 }
 
 #endif
