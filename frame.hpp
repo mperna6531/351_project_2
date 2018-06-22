@@ -18,8 +18,8 @@ public:
 
 Frame::Frame(bool assigned, int proc, int page) : 
   assigned_(assigned), 
-	proc_assign_(proc), 
-	page_num_(page) {}
+  proc_assign_(proc), 
+  page_num_(page) {}
 
 Frame::Frame() : assigned_(false) {}
 
