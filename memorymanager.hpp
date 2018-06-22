@@ -164,7 +164,7 @@ void MemoryManager::simulate() {
 
     if (curr_time_ > MAX_TIME) {
       std::cout << "DEADLOCK: max time reached\n";
-      break;
+      exit(1);
     }
   } while (!(pq_.empty() && fl_.empty()));
 
