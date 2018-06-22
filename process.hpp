@@ -20,7 +20,7 @@ public:
   int get_arrival() const;
   long get_load_time() const;
   long getTimeDone() const;
-  int getmem_req_s() const;
+  int get_mem_reqs() const;
   void end(long currTime);
   Process() {}
 };
@@ -36,7 +36,7 @@ long Process::getTimeDone() const {
   return time_done_;
 }
 
-int Process::getmem_req_s() const {
+int Process::get_mem_reqs() const {
   return mem_req_;
 }
 
