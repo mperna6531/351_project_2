@@ -21,11 +21,11 @@ private:
   std::vector<Process> pq_;
 
   void update_pl(int pid);
-  void printTurnaroundTime();
-  void queueArrival();
-  void printQueue() const;
-  void assgnAvailMem();
-  void endDoneProcesses();
+  void print_turnaround_time();
+  void queue_arrival();
+  void print_queue() const;
+  void assign_avail_mem();
+  void end_done_processes();
   std::string get_prefix();
 
 public:
@@ -71,21 +71,21 @@ MemoryManager::MemoryManager(int mem, int page_size, std::string &filename) :
   ifs.close();
 }
 
-void MemoryManager::queueArrival() {
+void MemoryManager::queue_arrival() {
   for (auto &proc : pl_) {
     if (proc.get_arrival() == curr_time_) {
       std::cout << get_prefix() <<
         "Process " << proc.get_pid() << " arrives" << std::endl;
           
       pq_.push_back(proc);
-      printQueue();
+      print_queue();
 
       fl_.print();
     }
   }
 }
 
-void MemoryManager::printQueue() const {
+void MemoryManager::print_queue() const {
   std::cout << "\tInput queue: [";
 
   for (auto el : pq_) {
@@ -105,7 +105,7 @@ std::string MemoryManager::get_prefix() {
   return result;
 }
 
-void MemoryManager::endDoneProcesses() {
+void MemoryManager::end_done_processes() {
   for (size_t i = 0; i < pl_.size(); ++i) {
     if (pl_[i].active()) {
       int time_elapsed = curr_time_ - pl_[i].get_load_time();
@@ -127,7 +127,7 @@ void MemoryManager::update_pl(int pid) {
       el.load_to_memory(curr_time_);
 }
 
-void MemoryManager::assgnAvailMem() {
+void MemoryManager::assign_avail_mem() {
   for (size_t i = 0; i < pq_.size(); ++i) {
     Process proc = pq_[i];
 
@@ -139,14 +139,14 @@ void MemoryManager::assgnAvailMem() {
       update_pl(proc.get_pid());
     
       pq_.erase(pq_.begin() + i);
-      printQueue();
-      assgnAvailMem();
+      print_queue();
+      assign_avail_mem();
       fl_.print();		
     }
   }
 }
 
-void MemoryManager::printTurnaroundTime()  {
+void MemoryManager::print_turnaround_time()  {
   float total = 0;
   for (auto proc : pl_) 
     total += proc.getTimeDone() - proc.get_arrival();
@@ -157,9 +157,9 @@ void MemoryManager::printTurnaroundTime()  {
 
 void MemoryManager::simulate() {
   do { 
-    queueArrival();
-    endDoneProcesses();
-    assgnAvailMem();
+    queue_arrival();
+    end_done_processes();
+    assign_avail_mem();
     ++curr_time_;
 
     if (curr_time_ > MAX_TIME) {
@@ -168,7 +168,7 @@ void MemoryManager::simulate() {
     }
   } while (!(pq_.empty() && fl_.empty()));
 
-  printTurnaroundTime();
+  print_turnaround_time();
 }
 
 #endif
