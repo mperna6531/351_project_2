@@ -19,9 +19,9 @@ public:
   void add_process(Process proc);
   FrameList(int num_frames, int pg_size) :
     num_frames_(num_frames), 
-	page_size_(pg_size),
-	frames_(FrameVector(num_frames)) {}
-  FrameList() {};
+	  page_size_(pg_size),
+	  frames_(FrameVector(num_frames)) {}
+    FrameList() {};
   void free_by_pid(int pid);
   bool empty();
 };
