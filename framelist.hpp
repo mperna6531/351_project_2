@@ -10,7 +10,7 @@
 class FrameList {
 private:
   using FrameVector = std::vector<Frame>;
-  
+
   int num_frames_;
   int page_size_;
   FrameVector frames_;
@@ -18,6 +18,7 @@ public:
   void print();
   bool fits(Process proc);
   void add_process(Process proc);
+  FrameList() {}
   FrameList(int num_frames, int pg_size);
   void free_by_pid(int pid);
   bool empty();
